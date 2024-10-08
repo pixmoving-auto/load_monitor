@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import psutil
 import rclpy
 from rclpy.node import Node
 import time
@@ -71,6 +72,9 @@ def getMemUsage():
   mem_usage = readMemInfo()
   return calcMemUsage(mem_usage)
 
+def getCpuTemp():
+  return psutil.sensors_temperatures()['coretemp'][0].current
+
 
 class LoadMonitorNode(Node):
   def __init__(self):
@@ -78,6 +82,7 @@ class LoadMonitorNode(Node):
     
     self.current_cpu_load = 0.0
     self.current_mem_load = 0.0
+    self.current_cpu_temp = 0.0
     self.current_odom = None
     self.prev_odom = None
     self.received_odom = False
@@ -107,13 +112,15 @@ class LoadMonitorNode(Node):
         return
     self.current_cpu_load = getCpuUsage()
     self.current_mem_load = getMemUsage()
+    self.current_cpu_temp = getCpuTemp()
     # write data
-    self.file.write('{},{},{},{},{}\n'.format(
+    self.file.write('{},{},{},{},{},{}\n'.format(
       self.current_odom.pose.pose.position.x, 
       self.current_odom.pose.pose.position.y, 
       self.current_odom.pose.pose.position.z,
       self.current_cpu_load,
-      self.current_mem_load
+      self.current_mem_load,
+      self.current_cpu_temp,
       ))
 
   def __del__(self):
