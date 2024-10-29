@@ -86,6 +86,7 @@ class LoadMonitorNode(Node):
     self.current_odom = None
     self.prev_odom = None
     self.received_odom = False
+    self.current_ts = 0.0
     
     self.odom_sub = self.create_subscription(
       Odometry, "/localization/kinematic_state", self.OdomCallback, 5
@@ -113,14 +114,16 @@ class LoadMonitorNode(Node):
     self.current_cpu_load = getCpuUsage()
     self.current_mem_load = getMemUsage()
     self.current_cpu_temp = getCpuTemp()
+    self.current_ts = time.time()
     # write data
-    self.file.write('{},{},{},{},{},{}\n'.format(
+    self.file.write('{},{},{},{},{},{}, {}\n'.format(
       self.current_odom.pose.pose.position.x, 
       self.current_odom.pose.pose.position.y, 
       self.current_odom.pose.pose.position.z,
       self.current_cpu_load,
       self.current_mem_load,
       self.current_cpu_temp,
+      self.current_ts
       ))
 
   def __del__(self):
