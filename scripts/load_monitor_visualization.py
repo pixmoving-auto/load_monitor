@@ -3,9 +3,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+import sys
 
 if __name__ == '__main__':
-  with open('load_monitor.csv', 'r') as file:
+  if len(sys.argv) < 2:
+    print("please input file name")
+    exit()
+  with open(sys.argv[1], 'r') as file:
     csv_reader = csv.reader(file, delimiter=',')
     x = []
     y = []

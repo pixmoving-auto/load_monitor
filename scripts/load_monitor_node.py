@@ -94,7 +94,7 @@ class LoadMonitorNode(Node):
     timer_period = 1.0
     self.timer = self.create_timer(timer_period, self.timerCallback)
     
-    self.file = open('load_monitor.csv', 'w')
+    self.file = open(time.strftime("%Y-%m-%d—%H-%M-%S_", time.localtime())+'load_monitor.csv', 'w')
     
   def OdomCallback(self, msg):
     if not self.received_odom:
