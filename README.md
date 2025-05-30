@@ -10,7 +10,7 @@ python3 scripts/load_monitor_node.py
 
 visualize data
 ```python
-python3 load_monitor_visualization.py [.csv file]
+python3 load_monitor_visualization.py [.csv file] [visualization mode "time" or "pose"]
 ```
 
 result

@@ -8,7 +8,7 @@ from nav_msgs.msg import Odometry
 
 def readCpuInfo():
   f = open('/proc/stat')
-  lines = f.readlines();
+  lines = f.readlines()
   f.close()
   for line in lines:
     line = line.lstrip()
@@ -21,6 +21,7 @@ def readCpuInfo():
   for i in range(1, len(counters)):
     total = total + int(counters[i])
   idle = int(counters[4])
+  f.close()
   return {'total':total, 'idle':idle}
 
 def calcCpuUsage(counters1, counters2):
@@ -61,6 +62,7 @@ def readMemInfo():
       res['cached'] = int(memItem[1])
       i = i +1
       continue
+  f.close()
   return res
 
 def calcMemUsage(counters):
@@ -75,6 +77,21 @@ def getMemUsage():
 def getCpuTemp():
   return psutil.sensors_temperatures()['coretemp'][0].current
 
+def getCpuClock():
+  f = open('/proc/cpuinfo')
+  lines = f.readlines()
+  clocks = []
+  for line in lines:
+    if 'MHz' in line:
+      value = line.split(':')[1].strip()
+      clocks.append(float(value))
+  f.close()
+  average_value = 0.0
+  for i in range(len(clocks)):
+    average_value += clocks[i]
+  average_value /= len(clocks)
+  return average_value
+
 
 class LoadMonitorNode(Node):
   def __init__(self):
@@ -83,6 +100,7 @@ class LoadMonitorNode(Node):
     self.current_cpu_load = 0.0
     self.current_mem_load = 0.0
     self.current_cpu_temp = 0.0
+    self.current_cpu_clock = 0.0
     self.current_odom = None
     self.prev_odom = None
     self.received_odom = False
@@ -114,15 +132,17 @@ class LoadMonitorNode(Node):
     self.current_cpu_load = getCpuUsage()
     self.current_mem_load = getMemUsage()
     self.current_cpu_temp = getCpuTemp()
+    self.current_cpu_clock = getCpuClock()
     self.current_ts = time.time()
     # write data
-    self.file.write('{},{},{},{},{},{}, {}\n'.format(
+    self.file.write('{},{},{},{},{},{},{},{}\n'.format(
       self.current_odom.pose.pose.position.x, 
       self.current_odom.pose.pose.position.y, 
       self.current_odom.pose.pose.position.z,
       self.current_cpu_load,
       self.current_mem_load,
       self.current_cpu_temp,
+      self.current_cpu_clock,
       self.current_ts
       ))
 
